@@ -66,6 +66,22 @@ class PlatformClient:
         row = self.get('connection')
         return {'origin': self.origin, 'connected': bool(row and row['origin'] == self.origin and (row['expires_at'] > time.time())), **({key: row[key] for key in ('account_id', 'token_id', 'expires_at', 'scopes')} if row else {})}
 
+    def account_status(self):
+        status = self.status()
+        if not status['connected']:
+            return status
+        try:
+            account = self.request('GET', 'account').json()
+            if account.get('account_id') != status['account_id']:
+                raise HTTPException(502, 'The platform returned a different account. Reconnect this Studio.')
+            return {**status, **{key: account[key] for key in ('email', 'display_name', 'wallet') if key in account}}
+        except HTTPException as error:
+            if error.status_code in {401, 403}:
+                self.put('connection', None)
+                self.put('model_catalog', None)
+                return {'origin': self.origin, 'connected': False, 'message': 'Sign in to OpenClass again. This device authorization is unavailable.'}
+            return {**status, 'connected': False, 'message': 'OpenClass account status is unavailable. Local courses remain on this device.'}
+
     def start(self, scopes):
         grant = self.request('POST', 'device', authenticated=False, json={'label': 'OpenClass Studio', 'scopes': scopes}).json()
         for key in ('verification_uri', 'verification_uri_complete'):

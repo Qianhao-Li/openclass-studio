@@ -11,7 +11,7 @@ class ConnectRequest(BaseModel):
 
 @router.get('')
 def status(user: WorkspacePrincipal=Depends(current_user)):
-    return local_platform_client(user.id).status()
+    return local_platform_client(user.id).account_status()
 
 @router.post('/connect')
 def connect(payload: ConnectRequest, user: WorkspacePrincipal=Depends(current_user)):
