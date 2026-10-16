@@ -1,0 +1,173 @@
+.outline {
+  --outline-row-height: 28px;
+  --outline-panel-top: max(0px, calc((100% - min(100%, 460px, calc(var(--outline-root-count) * var(--outline-row-height) + 14px))) / 2));
+  position: absolute;
+  z-index: 20;
+  top: 24px;
+  right: 12px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  width: 34px;
+  pointer-events: none;
+}
+
+.rail {
+  width: 34px;
+  max-height: 100%;
+  padding: 9px 4px;
+  overflow: hidden auto;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.outline[data-expanded="true"] .rail {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.marker {
+  display: flex;
+  align-items: center;
+  height: 12px;
+  padding-left: calc(var(--outline-depth) * 3px);
+}
+
+.line {
+  display: block;
+  width: var(--outline-line-width);
+  height: 2px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.55;
+  transition: width 120ms ease, opacity 120ms ease, background-color 120ms ease;
+}
+
+.marker[data-active="true"] .line,
+.item[aria-current="location"] .line {
+  width: calc(var(--outline-line-width) + 4px);
+  height: 3px;
+  background: var(--ring);
+  opacity: 1;
+}
+
+.marker:hover .line { opacity: 1; }
+
+.panel {
+  position: absolute;
+  top: var(--outline-panel-top);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--outline-panel-width);
+  height: calc(var(--outline-visible-count) * var(--outline-row-height) + 14px);
+  max-height: min(460px, calc(100% - var(--outline-panel-top)));
+  padding: 6px 0;
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 10%), 0 2px 6px rgb(15 23 42 / 4%);
+  pointer-events: auto;
+  animation: reveal 140ms ease-out;
+}
+
+.panel[hidden] { display: none; }
+
+.list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0 4px;
+  overflow: hidden auto;
+  list-style: none;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: var(--outline-row-height);
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.itemMarker {
+  display: flex;
+  align-items: center;
+  flex: 0 0 26px;
+  padding-left: calc(var(--outline-depth) * 3px);
+}
+
+.label {
+  display: block;
+  min-width: 0;
+  padding-left: calc(var(--outline-depth) * 12px);
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  margin-left: auto;
+  opacity: 0.65;
+  transition: transform 120ms ease;
+}
+
+.item[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+
+.item:is(:hover, :focus-visible) {
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+
+.item[aria-current="location"] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.rail:focus-visible, .item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.rail::-webkit-scrollbar { display: none; }
+
+@keyframes reveal {
+  from { opacity: 0; translate: 4px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@media (pointer: coarse) {
+  .outline { --outline-row-height: 36px; }
+  .marker { height: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { animation: none; }
+  .line, .chevron { transition: none; }
+}
+
+@media print {
+  .outline { display: none; }
+}

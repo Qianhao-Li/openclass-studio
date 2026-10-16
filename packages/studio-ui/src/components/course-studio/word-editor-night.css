@@ -1,0 +1,293 @@
+/* Keep theme colors in CSS: never serialize them into the course document. */
+@custom-variant editor-dark {
+  &[data-theme="dark"] { @slot; }
+  @media (prefers-color-scheme: dark) {
+    &[data-theme="system"] { @slot; }
+  }
+}
+
+/* Screen-only colors leave printed pages and exports in their original palette. */
+@media screen {
+  html {
+    @variant editor-dark {
+      .word-editor {
+        color-scheme: dark;
+        color: var(--foreground, #e8eaed);
+        background: var(--background, #111315);
+
+        .word-editor__canvas {
+          background: var(--background, #111315);
+          scrollbar-color: #5f6368 var(--background, #111315);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #5f6368;
+        }
+
+        .word-editor__page {
+          background: #17191c;
+          border-color: #5f6368;
+          box-shadow: 0 16px 48px rgb(0 0 0 / 28%);
+        }
+
+        .word-editor__page--borderless {
+          border-color: transparent;
+        }
+
+        .word-editor__page--grid {
+          background-image:
+            linear-gradient(to right, rgb(154 160 166 / 12%) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(154 160 166 / 12%) 1px, transparent 1px);
+          background-size: 26px 26px;
+        }
+
+        .word-editor__title-row,
+        .word-editor__chrome {
+          border-color: var(--surface-hover, #2c3138);
+        }
+
+        .word-editor__title,
+        .word-editor__content,
+        .word-editor__content :is(h1, h2, h3, .tiptap-mathematics-render),
+        .word-editor__resource-visual-title {
+          color: var(--foreground, #e8eaed);
+          caret-color: var(--foreground, #e8eaed);
+        }
+
+        .word-editor__page--line-numbers .word-editor__content > *::before {
+          color: var(--muted, #a1a8b2);
+        }
+
+        .word-editor__title::placeholder {
+          color: #9aa0a6;
+        }
+
+        .word-editor__content ::selection {
+          background: #394f72;
+          color: #ffffff;
+        }
+
+        /* Imported text may have an explicit dark ink color. Raise its lightness
+           for reading while keeping colored annotations and serialized styles. */
+        .word-editor__content span[style*="color:"]:not(mark *, .rich-code-block *) {
+          -webkit-text-fill-color: oklch(from currentColor max(l, 0.8) c h);
+        }
+
+        .word-editor__content mark {
+          color: #1f2937;
+          -webkit-text-fill-color: #1f2937;
+        }
+
+        .word-editor__content mark span[style*="color:"],
+        .word-editor__content span[style*="color:"] mark {
+          -webkit-text-fill-color: currentColor;
+        }
+
+        .word-editor__content blockquote {
+          background: var(--surface-muted, #22262b);
+          border-color: var(--ring, #7db5ff);
+          color: #d2d5da;
+        }
+
+        .word-editor__content pre:not(.rich-code-block__pre) {
+          background: var(--surface-muted, #22262b);
+          color: var(--foreground, #e8eaed);
+        }
+
+        .word-editor__content :is(th, td, hr) {
+          border-color: var(--border, #363c45);
+        }
+
+        .word-editor__content .selectedCell::after {
+          background: rgb(125 181 255 / 20%);
+        }
+
+        .word-editor__content .column-resize-handle {
+          background: var(--ring, #7db5ff);
+        }
+
+        .word-editor__content th {
+          background: var(--surface-muted, #22262b);
+        }
+
+        .word-editor__content a {
+          color: var(--ring, #7db5ff);
+        }
+
+        .word-editor__citation-ref,
+        .word-editor__citation-reference::before {
+          color: var(--ring, #7db5ff);
+        }
+
+        .word-editor__citation-ref.ProseMirror-selectednode {
+          background: rgba(138, 180, 248, 0.2);
+        }
+
+        .word-editor__citation-reference--active {
+          background: rgba(251, 191, 36, 0.22);
+          box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.12);
+        }
+
+        .word-editor__content :is(.inline-math-error, .block-math-error) {
+          background: #49252e;
+          color: #fda4af;
+        }
+
+        .word-editor__content .ProseMirror-selectednode {
+          outline-color: var(--ring, #7db5ff);
+        }
+
+        .word-editor__chrome,
+        .word-editor__resource-visual-eyebrow,
+        .word-editor__resource-visual-source,
+        .word-editor__resource-visual-status {
+          color: var(--muted, #a1a8b2);
+        }
+
+        .word-editor__watermark {
+          color: rgb(232 234 237 / 8%);
+        }
+
+        .word-editor__resource-visual,
+        .word-editor__resource-visual-media {
+          background: var(--background, #111315);
+          border-color: var(--border, #363c45);
+        }
+
+        .word-editor__resource-visual-status--error {
+          color: #fbbc04;
+        }
+
+        /* Theme the interactive controls, keeping the authored graph canvas,
+           illustrations, images, and syntax-highlighted code colors intact. */
+        [data-interactive-geometry] {
+          background: var(--surface, #1b1e22);
+          color: var(--foreground, #e8eaed);
+          border-color: var(--border, #363c45);
+
+          :where(button, input:not([type="range"])) {
+            background: var(--surface-muted, #22262b);
+            color: var(--foreground, #e8eaed);
+            border-color: var(--border, #363c45);
+          }
+
+          :where(button:not(:disabled):hover) {
+            background: var(--surface-hover, #2c3138);
+          }
+
+          :where(button, input):focus-visible {
+            outline: 2px solid var(--ring, #7db5ff);
+            outline-offset: 2px;
+          }
+
+          :where([class*="text-slate-"]):not([data-interactive-geometry-canvas] > div, [data-interactive-geometry-canvas] > div *) {
+            color: var(--muted, #a1a8b2);
+          }
+
+          :where([class*="text-amber-"]) { color: #fcd34d; }
+          :where([class*="text-emerald-"]) { color: #6ee7b7; }
+          :where([class*="text-rose-"]) { color: #fda4af; }
+        }
+
+        [data-editor-type] {
+          border-color: var(--border, #363c45);
+
+          figcaption { color: var(--muted, #a1a8b2); }
+          button { border-color: var(--border, #363c45); }
+        }
+
+        .word-editor__page-break::before {
+          border-color: var(--border, #363c45);
+          background: repeating-linear-gradient(180deg, transparent 0, transparent 38px, rgb(154 160 166 / 12%) 39px);
+        }
+
+        .word-editor__page-break::after {
+          border-color: #5f6368;
+          background: var(--surface, #1b1e22);
+          color: var(--muted, #a1a8b2);
+        }
+      }
+
+      .word-editor__toolbar {
+        background: var(--surface, #1b1e22);
+        border-color: var(--border, #363c45);
+        color: var(--foreground, #e8eaed);
+
+        :where([class*="border-"]) {
+          border-color: var(--border, #363c45);
+        }
+
+        :where([class*="text-gray-"]) {
+          color: var(--muted, #a1a8b2);
+        }
+
+        :where(button, input, textarea, select) {
+          color: var(--foreground, #e8eaed);
+          accent-color: var(--ring, #7db5ff);
+          box-shadow: none;
+        }
+
+        :where(button:not([style*="background"])) {
+          background: transparent;
+        }
+
+        :where(input:not([type="range"], [type="checkbox"], [type="radio"], [type="color"]), textarea, select),
+        .word-editor__table-dimensions,
+        .word-editor__zoom-controls {
+          background: var(--surface-muted, #22262b);
+        }
+
+        :where(button:not(:disabled, [style*="background"]):hover) {
+          background: var(--surface-hover, #2c3138);
+          color: #ffffff;
+        }
+
+        :where(button[aria-pressed="true"]) {
+          background: #394457;
+          border-color: var(--ring, #7db5ff);
+          color: #d2e3fc;
+        }
+
+        :where(button[aria-pressed="true"] span) {
+          color: inherit;
+        }
+
+        :where(button span[class*="bg-"]) {
+          background: transparent;
+        }
+
+        :where(input, textarea)::placeholder {
+          color: var(--muted, #a1a8b2);
+        }
+
+        .word-editor__zoom-range::-webkit-slider-runnable-track {
+          background: linear-gradient(to right, var(--ring, #7db5ff) 0%, var(--ring, #7db5ff) var(--word-zoom-progress), var(--border, #363c45) var(--word-zoom-progress), var(--border, #363c45) 100%);
+        }
+
+        .word-editor__zoom-range::-moz-range-track {
+          background: var(--border, #363c45);
+        }
+
+        .word-editor__zoom-range::-moz-range-progress {
+          background: var(--ring, #7db5ff);
+        }
+
+        .word-editor__zoom-range::-webkit-slider-thumb {
+          border-color: var(--surface, #1b1e22);
+          background: var(--ring, #7db5ff);
+        }
+
+        .word-editor__zoom-range::-moz-range-thumb {
+          border-color: var(--surface, #1b1e22);
+          background: var(--ring, #7db5ff);
+        }
+
+        :where(button, input, textarea, select):focus-visible {
+          outline: 2px solid var(--ring, #7db5ff);
+          outline-offset: 2px;
+        }
+      }
+
+    }
+  }
+}

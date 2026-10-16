@@ -1,0 +1,62 @@
+@media screen {
+  .word-editor__citation-reference--folded {
+    display: none !important;
+  }
+}
+
+.word-editor__citation-group {
+  margin: 0.55em 0;
+  font-size: 0.86em;
+  line-height: 1.55;
+}
+
+.word-editor__citation-group-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.15em 0.5em;
+  width: 100%;
+  padding: 0.65em 0.8em;
+  border: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+  border-radius: 0.5em;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 3%, transparent);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.word-editor__citation-group-toggle:hover {
+  background: color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.word-editor__citation-group-toggle:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.word-editor__citation-group-arrow {
+  grid-row: 1 / 4;
+}
+
+.word-editor__citation-group-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.word-editor__citation-group-range,
+.word-editor__citation-group-count {
+  grid-column: 2;
+  font-variant-numeric: tabular-nums;
+}
+
+.word-editor__citation-group-count {
+  font-size: 0.88em;
+  opacity: 0.7;
+}
+
+@media print {
+  .word-editor__citation-group {
+    display: none !important;
+  }
+}

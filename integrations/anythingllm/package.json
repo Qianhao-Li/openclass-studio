@@ -1,0 +1,31 @@
+{
+  "name": "openclass-anythingllm-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Source-only bootstrap for the vendored AnythingLLM server and collector",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "node --test *.test.cjs"
+  },
+  "dependencies": {
+    "@lancedb/lancedb": "0.15.0",
+    "@langchain/textsplitters": "0.0.0",
+    "@xenova/transformers": "2.17.2",
+    "adm-zip": "0.5.16",
+    "apache-arrow": "18.1.0",
+    "epub2": "github:Mintplex-Labs/epub2-static#eb0a45cd41ac1a5b4c97766e9935d97583104d35",
+    "html-to-text": "9.0.5",
+    "js-tiktoken": "1.0.21",
+    "langchain": "0.1.36",
+    "mammoth": "1.11.0",
+    "mime": "3.0.0",
+    "node-html-parser": "6.1.13",
+    "officeparser": "4.2.0",
+    "pdf-parse": "1.1.1",
+    "pdfjs-dist": "4.10.38",
+    "slugify": "1.6.6",
+    "uuid": "9.0.1"
+  }
+}

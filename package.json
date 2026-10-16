@@ -1,0 +1,42 @@
+{
+  "name": "openclass-studio",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web",
+    "packages/studio-ui"
+  ],
+  "scripts": {
+    "studio": "node scripts/studio.mjs",
+    "studio:setup": "node scripts/studio.mjs --setup",
+    "dev": "node scripts/studio.mjs --dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "typecheck:web": "npm --prefix apps/web run typecheck",
+    "lint:web": "eslint packages/studio-ui/src apps/web/src",
+    "test:api": ".venv/bin/python -m pytest",
+    "test:launcher": "node --test scripts/studio.test.mjs",
+    "test:e2e": "npm --prefix apps/web run test:studio",
+    "check:boundary": ".venv/bin/python scripts/check-studio-boundary.py",
+    "verify": "npm run check:boundary && npm run test:launcher && npm run typecheck:web && npm run lint:web && npm run test:api && npm run build:web"
+  },
+  "overrides": {
+    "postcss": "8.5.30",
+    "shell-quote": "1.12.0",
+    "@earendil-works/pi-coding-agent": {
+      "brace-expansion": "5.0.12"
+    }
+  },
+  "dependencies": {
+    "@openai/codex": "0.163.0",
+    "@earendil-works/pi-coding-agent": "0.87.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.2.4",
+    "lightningcss-linux-x64-gnu": "^1.32.0"
+  },
+  "license": "MIT"
+}

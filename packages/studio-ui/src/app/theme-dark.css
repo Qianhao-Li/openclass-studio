@@ -1,0 +1,122 @@
+/* Keep the variant in the same Tailwind compilation as the utilities. Screen
+   scope also keeps printed course documents independent of account appearance. */
+@custom-variant dark {
+  @media screen {
+    &:is([data-theme="dark"], [data-theme="dark"] *) { @slot; }
+    @media (prefers-color-scheme: dark) {
+      &:is([data-theme="system"], [data-theme="system"] *) { @slot; }
+    }
+  }
+}
+
+@media screen {
+  html[data-theme="light"], html[data-theme="warm"] { color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
+  html[data-theme="system"] { color-scheme: light dark; }
+}
+
+html {
+  @variant dark {
+    --background: #111315;
+    --foreground: #e8eaed;
+    --surface: #1b1e22;
+    --surface-muted: #22262b;
+    --surface-hover: #2c3138;
+    --border: #363c45;
+    --muted: #a1a8b2;
+    --ring: #7db5ff;
+    --danger: #fda4af;
+    scrollbar-color: #555d69 var(--background);
+  }
+}
+
+/* Page chrome has a handful of legacy, warm-paper surfaces. Keep their light
+   appearance while sharing the same dark surfaces across every route. */
+:is(html:has(.auth-shell), body:has(.auth-shell), .profile-shell,
+  .profile-shell--light, .profile-shell--warm) {
+  @variant dark { background: var(--background); }
+}
+
+.profile-shell--high-contrast {
+  @variant dark { color: #ffffff; }
+}
+.profile-shell--high-contrast :is(input, select, textarea, button, a) {
+  @variant dark { border-color: #a1a8b2; }
+}
+
+::selection {
+  @variant dark { background: #355578; color: #ffffff; }
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @variant dark { background: #555d69; }
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  @variant dark { background: #778190; }
+}
+.content-block:hover {
+  @variant dark { background-color: var(--surface-muted); }
+}
+
+/* Arbitrary page colors predate the shared palette. These exact utility names
+   avoid recoloring source images, SVG figures, inline author colors or charts. */
+:is(.bg-\[\#f7f5ef\], .bg-\[\#f7f5f0\], .bg-\[\#f4f1e9\],
+  .bg-\[\#f5f3ee\], .bg-\[\#f8f6f0\], .bg-\[\#f8fafc\],
+  .bg-\[\#f6f8fa\]) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: var(--background); } }
+}
+:is(.bg-\[\#fcfbf8\], .bg-\[\#fcfcfc\], .bg-\[\#fbfcfe\]) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: var(--surface); } }
+}
+.bg-\[\#eef0f3\] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: var(--surface-muted); } }
+}
+:is(.bg-\[\#fcfbf8\]\/92, .bg-\[\#f5f3ee\]\/92) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: color-mix(in srgb, var(--surface) 92%, transparent); } }
+}
+.bg-\[\#fcfbf8\]\/95 {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: color-mix(in srgb, var(--surface) 95%, transparent); } }
+}
+.bg-\[\#fcfbf8\]\/85 {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: color-mix(in srgb, var(--surface) 85%, transparent); } }
+}
+:is(.text-\[\#1a1a1a\], .text-\[\#171717\]) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { color: var(--foreground); } }
+}
+:is(.bg-\[\#f4f6ff\], .bg-\[\#f2f6ff\]) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: #202c44; } }
+}
+:is(.bg-\[\#f7f2ff\], .bg-\[\#faf6ff\]) {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: #30223f; } }
+}
+.bg-\[\#ffe7ef\] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-color: #3b2330; } }
+}
+.text-\[\#8b3dff\] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { color: #c4a1ff; } }
+}
+.text-\[\#2f6bff\] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { color: #8db4ff; } }
+}
+.border-\[\#ece4d9\] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { border-color: var(--border); } }
+}
+
+@media print {
+  html { color-scheme: light; }
+}
+
+[class~="bg-[linear-gradient(180deg,#ffffff_0%,#faf8f2_100%)]"],
+[class~="bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(245,250,255,0.92))]"] {
+  @variant dark { &:not(.word-editor__content, .word-editor__content *) { background-image: linear-gradient(135deg, var(--surface), var(--surface-muted)); } }
+}
+
+/* History and coverage are UI visualizations: preserve their colored topology
+   and pastel range fills, while keeping small labels readable on each surface. */
+[data-coverage-action-id] {
+  @variant dark { color: #171717; }
+}
+@supports (-webkit-text-fill-color: oklch(from currentColor max(l, 0.76) c h)) {
+  [data-history-node-id] :is(span, button)[style*="color:"] {
+    @variant dark { -webkit-text-fill-color: oklch(from currentColor max(l, 0.76) c h); }
+  }
+}

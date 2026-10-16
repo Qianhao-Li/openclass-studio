@@ -1,0 +1,56 @@
+[project]
+name = "openclass-core"
+version = "0.1.0"
+description = "Portable OpenClass course engine and local Studio API"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+requires-python = ">=3.13"
+dependencies = [
+  "fastapi==0.136.0",
+  "uvicorn==0.44.0",
+  "pydantic==2.13.2",
+  "python-multipart==0.0.26",
+  "pypdf==6.10.2",
+  "pypdfium2==5.14.0",
+  "resvg-py==0.5.0",
+  "Pillow==12.3.0",
+  "python-docx==1.2.0",
+  "reportlab==4.4.4",
+  "openai==2.32.0",
+  "httpx==0.28.1",
+  "google-auth==2.58.0",
+  "requests>=2.32.0,<3",
+  "PyJWT[crypto]==2.10.1",
+  "websockets==15.0.1",
+  "python-dotenv==1.1.1",
+  "certifi==2025.11.12",
+  "cryptography>=46,<49",
+  "yt-dlp==2026.7.4",
+  "markdown-it-py==4.2.0",
+  "tiktoken==0.14.0",
+  "jsonschema==4.26.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.0.3"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["apps/api"]
+testpaths = ["apps/api/tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+"" = "apps/api"
+
+[tool.setuptools.packages.find]
+where = ["apps/api"]
+include = ["openclass_core*"]
+exclude = ["data*"]
+
+[tool.setuptools.package-data]
+openclass_core = ["services/*.ts", "services/**/*.ts"]

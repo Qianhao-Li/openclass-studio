@@ -1,0 +1,72 @@
+.rateRange {
+  --speech-rate-progress: 0%;
+  --speech-rate-fill: var(--foreground, #111827);
+  --speech-rate-track: var(--border, #d1d5db);
+  --speech-rate-thumb-border: var(--surface, #ffffff);
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  cursor: pointer;
+  background: transparent;
+}
+
+.rateRange:focus-visible {
+  outline: none;
+}
+
+.rateRange::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--speech-rate-fill) 0%,
+    var(--speech-rate-fill) var(--speech-rate-progress),
+    var(--speech-rate-track) var(--speech-rate-progress),
+    var(--speech-rate-track) 100%
+  );
+}
+
+.rateRange::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border: 2px solid var(--speech-rate-thumb-border);
+  border-radius: 999px;
+  background: var(--speech-rate-fill);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 28%);
+}
+
+.rateRange:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 1px 3px rgb(15 23 42 / 28%),
+    0 0 0 3px color-mix(in srgb, var(--ring, #111827) 35%, transparent);
+}
+
+.rateRange::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--speech-rate-track);
+}
+
+.rateRange::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--speech-rate-fill);
+}
+
+.rateRange::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--speech-rate-thumb-border);
+  border-radius: 999px;
+  background: var(--speech-rate-fill);
+  box-shadow: 0 1px 3px rgb(15 23 42 / 28%);
+}
+
+.rateRange:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 1px 3px rgb(15 23 42 / 28%),
+    0 0 0 3px color-mix(in srgb, var(--ring, #111827) 35%, transparent);
+}
