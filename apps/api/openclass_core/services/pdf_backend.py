@@ -32,6 +32,9 @@ class Pixmap:
         self.image.save(output, format=format.upper())
         return output.getvalue()
 
+    def save(self, filename):
+        self.image.save(filename)
+
 class Document:
 
     def __init__(self, content):

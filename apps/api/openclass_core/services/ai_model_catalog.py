@@ -21,6 +21,9 @@ def text_model_supports_image_inputs(selection, *, user_id, catalog_builder=None
         from openclass_core.services.model_capability_snapshot import frozen_image_capability
         return frozen_image_capability(selection, user_id, frozen_capabilities)
     try:
+        capability = host_service('model_image_capability', selection, user_id=user_id, catalog_builder=catalog_builder)
+        if capability is not None:
+            return capability is True
         catalog = catalog_builder(user_id) if catalog_builder else build_model_catalog(user_id, selection.connection_id)
     except Exception:
         return False
