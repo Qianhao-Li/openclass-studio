@@ -66,6 +66,28 @@ export function LocalPlatformControls({ onNavigate, renderTrigger }: {
     try { await action(); } catch (error) { setMessage(error instanceof Error ? error.message : "The platform operation failed."); }
     finally { setBusy(false); }
   }
+  function signIn(scopes = ["models.invoke"], checkConnection = false) {
+    if (busy || grant) return;
+    // Reserve the tab during the user's click so browser popup rules allow the official login page.
+    const popup = window.open("about:blank", "_blank");
+    if (popup) popup.opener = null;
+    void run(async () => {
+      try {
+        if (checkConnection) {
+          const current = await studioPlatform.status();
+          setStatus(current);
+          if (current.connected) { popup?.close(); return; }
+        }
+        const pending = await studioPlatform.connect(scopes);
+        setGrant(pending);
+        popup?.location.replace(pending.verification_uri_complete);
+      } catch (error) { popup?.close(); throw error; }
+    });
+  }
+  function show() {
+    setOpen(true);
+    if (!status?.connected) signIn(["models.invoke"], true);
+  }
   async function push() {
     if (!course?.ridoc_revision) throw new Error("Save this course before Push.");
     const storageKey = `openclass:sync:${principal?.id}:${status?.origin}:${status?.account_id}:push:${course.id}:${course.ridoc_revision}`;
@@ -75,14 +97,16 @@ export function LocalPlatformControls({ onNavigate, renderTrigger }: {
     setRemote(await studioPlatform.courses());
     setMessage(`Pushed course revision ${receipt.ridoc_revision.slice(0, 12)}.`);
   }
-  return <>{renderTrigger ? renderTrigger({ onOpen: () => setOpen(true), connected: status?.connected === true })
-    : <button className="rounded-lg border px-3 py-1.5" onClick={() => setOpen(true)}>OpenClass connection</button>}
+  return <>{renderTrigger ? renderTrigger({ onOpen: show, connected: status?.connected === true })
+    : <button className="rounded-lg border px-3 py-1.5" onClick={show}>OpenClass connection</button>}
     {open ? <div className="fixed inset-0 z-[310] flex items-center justify-center bg-black/30 p-6"><section role="dialog" aria-modal="true" aria-label="OpenClass connection" className="max-h-[85vh] w-full max-w-xl space-y-4 overflow-auto rounded-2xl bg-white p-6 shadow-xl">
       <header className="flex items-center justify-between"><h2 className="text-lg font-semibold">OpenClass connection</h2><button aria-label="Close platform connection" onClick={() => setOpen(false)}>✕</button></header>
       <p className="text-sm text-stone-600">Local courses stay on this device. Connecting allows the permissions you approve; uploading a course requires Push.</p>
       <p className="text-sm">Platform: {status?.origin || "https://open-classes.com"}</p>
       {status?.connected ? <>
-        <p className="text-sm">Connected account: {status.account_id}</p>
+        <p className="text-sm">Connected account: {status.email || status.display_name || status.account_id}</p>
+        {status.wallet ? <p className="text-sm">Available credits: <strong>{status.wallet.available_credits.toLocaleString()}</strong></p> : null}
+        <p className="text-sm text-stone-600">Choose a model marked Platform quota to use your account credits.</p>
         <button disabled={busy} className="rounded-lg border px-3 py-2" onClick={() => void run(async () => { const result = await studioPlatform.disconnect(); setStatus(await studioPlatform.status()); setRemote([]); refreshModels(); setMessage(result.message || "Disconnected. Local courses and personal model accounts remain available."); })}>Disconnect platform</button>
         {status.scopes?.includes("repositories.write") ? <div className="space-y-3 rounded-xl border p-4">
           <p className="text-sm">Saved course: {course?.title || "No active course"}</p>
@@ -105,9 +129,9 @@ export function LocalPlatformControls({ onNavigate, renderTrigger }: {
           })}>Submit course PR</button>
         </div> : <p className="text-sm">This connection permits model usage. Reconnect with course exchange enabled to Push, Pull or submit PRs.</p>}
       </> : <><label className="flex gap-2 text-sm"><input type="checkbox" checked={transfer} onChange={event => setTransfer(event.target.checked)} />Allow course download, Push and PR submission</label>
-        <button disabled={busy || Boolean(grant)} className="rounded-lg bg-stone-900 px-3 py-2 text-white" onClick={() => void run(async () => setGrant(await studioPlatform.connect(transfer ? ["models.invoke", "repositories.read", "repositories.write", "course_prs.write"] : ["models.invoke"])))}>Connect OpenClass account</button>
+        <button disabled={busy || Boolean(grant)} className="rounded-lg bg-stone-900 px-3 py-2 text-white" onClick={() => signIn(transfer ? ["models.invoke", "repositories.read", "repositories.write", "course_prs.write"] : ["models.invoke"])}>Connect OpenClass account</button>
         {grant ? <div className="space-y-2 text-sm"><p>Authorization code: <strong className="font-mono">{grant.user_code}</strong></p><a className="underline" href={grant.verification_uri_complete} target="_blank" rel="noreferrer">Open platform authorization</a></div> : null}
       </>}
-      {message ? <p role="status" className="text-sm">{message}</p> : null}
+      {message || status?.message ? <p role="status" className="text-sm">{message || status?.message}</p> : null}
     </section></div> : null}</>;
 }

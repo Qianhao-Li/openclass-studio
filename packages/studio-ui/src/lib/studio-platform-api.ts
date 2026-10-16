@@ -1,7 +1,11 @@
 import { api } from "./api";
 import type { CoursePackage } from "../types";
 
-export type PlatformConnection = { connected: boolean; origin: string; account_id?: string; scopes?: string[] };
+export type PlatformConnection = {
+  connected: boolean; origin: string; account_id?: string; scopes?: string[];
+  email?: string; display_name?: string; message?: string;
+  wallet?: { balance_credits: number; available_credits: number; reserved_credits: number };
+};
 export type PlatformGrant = { attempt_id: string; user_code: string; verification_uri_complete: string; interval: number; expires_in: number };
 export type DeviceApproval = { label: string; user_code: string; scopes: string[] };
 export type PullCourseRequest = { operation_id: string; revision?: string; package_id?: string; expected_ridoc_revision?: string };
