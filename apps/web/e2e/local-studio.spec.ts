@@ -120,7 +120,8 @@ test("a portable RIDOC renders its embedded image and equation without the autho
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });
 
-test("the avatar keeps sign in and local controls in a compact account menu", async ({ page }) => {
+test("the avatar keeps sign in and local controls in a compact account menu", async ({ page, context }) => {
+  await context.route("**/*", route => ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
   await page.goto("/studio");
   const avatar = page.getByRole("button", { name: "OpenClass User Avatar", exact: true });
   await expect(avatar).toBeVisible();
