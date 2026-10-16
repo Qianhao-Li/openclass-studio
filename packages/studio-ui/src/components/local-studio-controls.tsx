@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { LocalPlatformControls } from "./local-platform-controls";
+import { LocalAccountMenu } from "./local-account-menu";
 import { useRoutePanel } from "../hooks/use-route-panel";
 import { api } from "../lib/api";
 import { MODEL_CREDENTIALS_CHANGED_EVENT } from "./course-studio/model-catalog";
@@ -73,12 +74,12 @@ export function LocalStudioControls({ onNavigate }: { onNavigate?: (href: string
     window.dispatchEvent(new Event(MODEL_CREDENTIALS_CHANGED_EVENT));
   }
   return <>
-    <div className="flex items-center gap-2 text-sm">
-      <span className="hidden text-stone-500 sm:inline">On this device</span>
-      <button className="rounded-lg border px-3 py-1.5" onClick={() => setPanel("files")}>Courses</button>
-      <button className="rounded-lg border px-3 py-1.5" onClick={() => setPanel("models")}>Model settings</button>
-      <LocalPlatformControls onNavigate={onNavigate} />
-    </div>
+    <LocalPlatformControls onNavigate={onNavigate} renderTrigger={({ onOpen, connected }) => <LocalAccountMenu
+      connected={connected}
+      onCourses={() => setPanel("files")}
+      onModels={() => setPanel("models")}
+      onPlatform={onOpen}
+    />} />
     {panel ? <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/30 p-6" role="presentation">
       <section role="dialog" aria-modal="true" aria-label={panel === "files" ? "Local courses" : "Personal models"} className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
         <header className="mb-5 flex items-center justify-between"><h2 className="text-lg font-semibold">{panel === "files" ? "Courses on this device" : "Your model accounts and API keys"}</h2><button aria-label="Close dialog" onClick={() => { setPanel(null); setKey(""); }}>✕</button></header>

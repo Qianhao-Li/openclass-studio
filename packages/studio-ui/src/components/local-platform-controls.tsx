@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "../lib/api";
 import type { CoursePackage } from "../types";
@@ -10,7 +10,10 @@ import { pendingSyncOperation, completeSyncOperation } from "../lib/studio-sync-
 import type { PullCourseRequest } from "../lib/studio-platform-api";
 import { useRoutePanel } from "../hooks/use-route-panel";
 
-export function LocalPlatformControls({ onNavigate }: { onNavigate?: (href: string) => Promise<void> }) {
+export function LocalPlatformControls({ onNavigate, renderTrigger }: {
+  onNavigate?: (href: string) => Promise<void>;
+  renderTrigger: (props: { onOpen: () => void; connected: boolean }) => ReactNode;
+}) {
   const params = useSearchParams();
   const principal = useWorkspacePrincipal();
   const [open, setOpen] = useRoutePanel(params.get("platform") === "1");
@@ -26,6 +29,11 @@ export function LocalPlatformControls({ onNavigate }: { onNavigate?: (href: stri
   const operation = useRef<{ revision: string; id: string } | null>(null);
   const lessonId = params.get("lesson");
   const refreshModels = () => window.dispatchEvent(new Event(MODEL_CREDENTIALS_CHANGED_EVENT));
+  useEffect(() => {
+    let active = true;
+    void studioPlatform.status().then(value => { if (active) setStatus(value); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   useEffect(() => {
     if (!open) return;
     let active = true;
@@ -72,7 +80,7 @@ export function LocalPlatformControls({ onNavigate }: { onNavigate?: (href: stri
     setRemote(await studioPlatform.courses());
     setMessage(`Pushed course revision ${receipt.ridoc_revision.slice(0, 12)}.`);
   }
-  return <><button className="rounded-lg border px-3 py-1.5" onClick={() => void run(show)}>OpenClass connection</button>
+  return <>{renderTrigger({ onOpen: () => void run(show), connected: status?.connected === true })}
     {open ? <div className="fixed inset-0 z-[310] flex items-center justify-center bg-black/30 p-6"><section role="dialog" aria-modal="true" aria-label="OpenClass connection" className="max-h-[85vh] w-full max-w-xl space-y-4 overflow-auto rounded-2xl bg-white p-6 shadow-xl">
       <header className="flex items-center justify-between"><h2 className="text-lg font-semibold">OpenClass connection</h2><button aria-label="Close platform connection" onClick={() => setOpen(false)}>✕</button></header>
       <p className="text-sm text-stone-600">Local courses stay on this device. Connecting allows the permissions you approve; uploading a course requires Push.</p>

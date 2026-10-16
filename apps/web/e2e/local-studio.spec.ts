@@ -4,6 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+async function openLocalCourses(page: Page) {
+  await page.getByRole("button", { name: "OpenClass User Avatar", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Courses on this device", exact: true }).click();
+}
+
 async function createLocalCourse(page: Page) {
   const previous = new URL(page.url()).searchParams.get("lesson");
   const loaded = page.waitForResponse(response => {
@@ -31,7 +36,7 @@ test("local Studio edits and reopens a course without any platform session or ne
   });
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/studio");
-  await page.getByRole("button", { name: "Courses", exact: true }).click();
+  await openLocalCourses(page);
   await createLocalCourse(page);
   const editor = page.locator(".ProseMirror").first();
   await expect(editor).toHaveAttribute("contenteditable", "true");
@@ -64,7 +69,7 @@ test("local originals keep exact bytes and a saved course reopens after its sour
   const origin = process.env.OPENCLASS_STUDIO_E2E_API || "http://127.0.0.1:8510";
   await context.route("**/*", route => ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
   await page.goto("/studio");
-  await page.getByRole("button", { name: "Courses", exact: true }).click();
+  await openLocalCourses(page);
   await createLocalCourse(page);
   const marker = `Independent saved course ${Date.now()}`;
   const saved = page.waitForResponse(response => /\/document\/save(?:\?|$)/.test(response.url()) && response.request().method() === "POST");
@@ -103,7 +108,7 @@ test("a portable RIDOC renders its embedded image and equation without the autho
     fs.rmSync(path.join(directory, "author"), { recursive: true });
     await context.route("**/*", route => ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
     await page.goto("/studio");
-    await page.getByRole("button", { name: "Courses", exact: true }).click();
+    await openLocalCourses(page);
     await page.getByLabel("Import RIDOC file").setInputFiles(fixture);
     await expect(page.locator(".ProseMirror").first()).toContainText("Portable course fixture");
     const image = page.locator('.ProseMirror img[alt="Portable image"]').first();
@@ -113,4 +118,29 @@ test("a portable RIDOC renders its embedded image and equation without the autho
     await page.reload();
     await expect.poll(() => page.locator('.ProseMirror img[alt="Portable image"]').first().evaluate(element => (element as HTMLImageElement).naturalWidth)).toBe(1);
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
+
+test("the avatar keeps sign in and local controls in a compact account menu", async ({ page }) => {
+  await page.goto("/studio");
+  const avatar = page.getByRole("button", { name: "OpenClass User Avatar", exact: true });
+  await expect(avatar).toBeVisible();
+  const avatarBounds = await avatar.boundingBox();
+  expect(avatarBounds?.width).toBe(44);
+  await expect(page.getByRole("button", { name: "OpenClass connection", exact: true })).toHaveCount(0);
+  await avatar.click();
+  await expect(page.getByRole("menuitem", { name: "Sign in to OpenClass", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  await expect(avatar).toBeFocused();
+  await avatar.click();
+  await page.getByRole("menuitem", { name: "Model settings", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Personal models", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Close dialog", exact: true }).click();
+  await avatar.click();
+  await page.getByRole("menuitem", { name: "Sign in to OpenClass", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "OpenClass connection", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect OpenClass account", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Close platform connection", exact: true }).click();
+  await avatar.click();
+  await page.screenshot({ path: test.info().outputPath("avatar-restored.png"), fullPage: true });
 });
