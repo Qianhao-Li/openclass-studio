@@ -4,7 +4,10 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from collections.abc import Callable, Iterator, Mapping
 from typing import Any
-_defaults: dict[str, Callable[..., Any]] = {'recover_workspace_pull': lambda *_args, **_kwargs: None}
+_defaults: dict[str, Callable[..., Any]] = {
+    'recover_workspace_pull': lambda *_args, **_kwargs: None,
+    'model_image_capability': lambda *_args, **_kwargs: None,
+}
 _scope: ContextVar[Mapping[str, Callable[..., Any]] | None] = ContextVar('studio_services', default=None)
 
 def configure_studio_services(services: Mapping[str, Callable[..., Any]]) -> None:
