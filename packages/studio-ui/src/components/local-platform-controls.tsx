@@ -66,11 +66,6 @@ export function LocalPlatformControls({ onNavigate, renderTrigger }: {
     try { await action(); } catch (error) { setMessage(error instanceof Error ? error.message : "The platform operation failed."); }
     finally { setBusy(false); }
   }
-  async function show() {
-    const query = new URLSearchParams(params.toString()); query.set("platform", "1");
-    if (onNavigate) await onNavigate(`/studio?${query}`);
-    setOpen(true);
-  }
   async function push() {
     if (!course?.ridoc_revision) throw new Error("Save this course before Push.");
     const storageKey = `openclass:sync:${principal?.id}:${status?.origin}:${status?.account_id}:push:${course.id}:${course.ridoc_revision}`;
@@ -80,8 +75,8 @@ export function LocalPlatformControls({ onNavigate, renderTrigger }: {
     setRemote(await studioPlatform.courses());
     setMessage(`Pushed course revision ${receipt.ridoc_revision.slice(0, 12)}.`);
   }
-  return <>{renderTrigger ? renderTrigger({ onOpen: () => void run(show), connected: status?.connected === true })
-    : <button className="rounded-lg border px-3 py-1.5" onClick={() => void run(show)}>OpenClass connection</button>}
+  return <>{renderTrigger ? renderTrigger({ onOpen: () => setOpen(true), connected: status?.connected === true })
+    : <button className="rounded-lg border px-3 py-1.5" onClick={() => setOpen(true)}>OpenClass connection</button>}
     {open ? <div className="fixed inset-0 z-[310] flex items-center justify-center bg-black/30 p-6"><section role="dialog" aria-modal="true" aria-label="OpenClass connection" className="max-h-[85vh] w-full max-w-xl space-y-4 overflow-auto rounded-2xl bg-white p-6 shadow-xl">
       <header className="flex items-center justify-between"><h2 className="text-lg font-semibold">OpenClass connection</h2><button aria-label="Close platform connection" onClick={() => setOpen(false)}>✕</button></header>
       <p className="text-sm text-stone-600">Local courses stay on this device. Connecting allows the permissions you approve; uploading a course requires Push.</p>

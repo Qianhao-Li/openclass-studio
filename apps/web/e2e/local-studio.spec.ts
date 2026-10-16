@@ -122,6 +122,11 @@ test("a portable RIDOC renders its embedded image and equation without the autho
 
 test("the avatar keeps sign in and local controls in a compact account menu", async ({ page, context }) => {
   await context.route("**/*", route => ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
+  const panelNavigations: string[] = [];
+  page.on("request", request => {
+    const url = new URL(request.url());
+    if (url.pathname === "/studio" && url.searchParams.has("platform")) panelNavigations.push(request.url());
+  });
   await page.goto("/studio");
   const avatar = page.getByRole("button", { name: "OpenClass User Avatar", exact: true });
   await expect(avatar).toBeVisible();
@@ -142,6 +147,9 @@ test("the avatar keeps sign in and local controls in a compact account menu", as
   await expect(page.getByRole("dialog", { name: "OpenClass connection", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Connect OpenClass account", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Close platform connection", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "OpenClass connection", exact: true })).toHaveCount(0);
   await avatar.click();
+  await expect(page.getByRole("menu", { name: "Account menu", exact: true })).toBeVisible();
+  expect(panelNavigations).toEqual([]);
   await page.screenshot({ path: test.info().outputPath("avatar-restored.png"), fullPage: true });
 });
