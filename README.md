@@ -27,6 +27,17 @@ requires an internet connection and a supported personal model account or API ke
 Personal credentials stay on the device. Platform connection is optional and does
 not change ownership of local courses or authorize automatic uploads.
 
+To use your OpenClass account credits, open the avatar menu and choose **Sign in
+to OpenClass**. The official site opens in another tab. Sign in with a login method
+already linked to your account, compare the device code, and approve the connection.
+Return to Studio and choose a model marked **Platform quota**. The account and
+available credits appear in the connection panel. Available quota models come from
+the official service and require verifiable usage for wallet settlement.
+
+**Disconnect platform** revokes this device's authorization. You can also revoke
+authorized devices on the official `/studio-connect` page. Local courses remain
+saved on the device after signing out.
+
 To enable the preserved AnythingLLM source adapter, install its pinned optional
 dependencies with `npm ci --prefix integrations/anythingllm`, then launch with
 `OPENCLASS_STUDIO_SOURCE_PROCESSOR=anythingllm npm run studio`. Originals and
@@ -57,4 +68,5 @@ to impersonate the official OpenClass service.
 
 Run `npm run verify` and `npm run test:e2e`. Real provider calls, platform-credit
 acceptance and Windows/WSL2 acceptance are recorded separately from offline tests.
-This source candidate must pass the release checks before it is published.
+Browser regressions distinguish local/offline flows and account-connection UI
+from live official-account authorization and provider billing acceptance.

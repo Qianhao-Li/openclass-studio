@@ -122,6 +122,7 @@ test("a portable RIDOC renders its embedded image and equation without the autho
 
 test("the avatar keeps sign in and local controls in a compact account menu", async ({ page, context }) => {
   await context.route("**/*", route => ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort());
+  await context.route("**/api/workbench/v1/platform/connect", route => route.fulfill({ status: 503, json: { detail: "Official sign-in is unavailable in this offline test." } }));
   const panelNavigations: string[] = [];
   page.on("request", request => {
     const url = new URL(request.url());
@@ -152,4 +153,65 @@ test("the avatar keeps sign in and local controls in a compact account menu", as
   await expect(page.getByRole("menu", { name: "Account menu", exact: true })).toBeVisible();
   expect(panelNavigations).toEqual([]);
   await page.screenshot({ path: test.info().outputPath("avatar-restored.png"), fullPage: true });
+});
+
+test("sign in opens official authorization and shows the approved account and credits after refresh", async ({ page, context }) => {
+  let connected = false;
+  let started = 0;
+  let disconnected = 0;
+  await context.route("**/api/workbench/v1/platform", route => {
+    if (route.request().method() === "DELETE") {
+      connected = false; disconnected += 1;
+      return route.fulfill({ json: { connected: false, remote_revoked: true } });
+    }
+    return route.fulfill({ json: { connected, origin: "https://open-classes.com", ...(connected ? {
+      account_id: "approved-account", email: "approved@example.test", scopes: ["models.invoke"],
+      wallet: { balance_credits: 50, available_credits: 45, reserved_credits: 5 },
+    } : {}) } });
+  });
+  await context.route("**/api/workbench/v1/platform/connect", route => {
+    expect(route.request().postDataJSON()).toEqual({ scopes: ["models.invoke"] });
+    started += 1;
+    return route.fulfill({ json: { attempt_id: "test-attempt", user_code: "ABCD-EFGH", interval: 0.05, expires_in: 600,
+      verification_uri_complete: "https://open-classes.com/studio-connect?user_code=ABCD-EFGH" } });
+  });
+  await context.route("**/api/workbench/v1/platform/connect/test-attempt", route => {
+    connected = true;
+    return route.fulfill({ json: { status: "connected" } });
+  });
+  await context.route("https://open-classes.com/studio-connect?user_code=ABCD-EFGH", route => route.fulfill({ body: "<h1>Official device authorization fixture</h1>", contentType: "text/html" }));
+  await page.goto("/studio");
+  await page.getByRole("button", { name: "OpenClass User Avatar", exact: true }).click();
+  const popup = page.waitForEvent("popup");
+  await page.getByRole("menuitem", { name: "Sign in to OpenClass", exact: true }).click();
+  const official = await popup;
+  await expect(official).toHaveURL("https://open-classes.com/studio-connect?user_code=ABCD-EFGH");
+  const dialog = page.getByRole("dialog", { name: "OpenClass connection", exact: true });
+  await expect(dialog).toContainText("approved@example.test");
+  await expect(dialog).toContainText("Available credits: 45");
+  expect(started).toBe(1);
+  await page.getByRole("button", { name: "Close platform connection", exact: true }).click();
+  await page.reload();
+  await page.getByRole("button", { name: "OpenClass User Avatar", exact: true }).click();
+  await page.getByRole("menuitem", { name: "OpenClass account", exact: true }).click();
+  await expect(dialog).toContainText("approved@example.test");
+  expect(started).toBe(1);
+  await page.getByRole("button", { name: "Disconnect platform", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Disconnected");
+  expect(disconnected).toBe(1);
+  await page.getByRole("button", { name: "Close platform connection", exact: true }).click();
+  await expect(page.locator(".ProseMirror").first()).toHaveAttribute("contenteditable", "true");
+  await official.close();
+});
+
+test("a sign-in failure keeps the local editor available and does not show a connected account", async ({ page, context }) => {
+  await context.route("**/api/workbench/v1/platform", route => route.fulfill({ json: { connected: false, origin: "https://open-classes.com" } }));
+  await context.route("**/api/workbench/v1/platform/connect", route => route.fulfill({ status: 503, json: { detail: "Official sign-in is temporarily unavailable." } }));
+  await page.goto("/studio");
+  await page.getByRole("button", { name: "OpenClass User Avatar", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Sign in to OpenClass", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("temporarily unavailable");
+  await expect(page.getByRole("button", { name: "Connect OpenClass account", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Close platform connection", exact: true }).click();
+  await expect(page.locator(".ProseMirror").first()).toHaveAttribute("contenteditable", "true");
 });
